@@ -82,7 +82,7 @@ export default function Home() {
 
   async function fetchDataFromGemini(searchText: string) {
     try {
-      const prompt = `${searchText} (Summarize this text and provide the following analyses in JSON format:
+      const prompt = `${searchText} (Summarize the text and provide the following analyses in JSON format without formatting or using markdown. Respond with only JSON):
       {
         "summary": "",
         "sentiment_analysis": {
@@ -97,7 +97,7 @@ export default function Home() {
         "keyword_extraction": {
           "keywords": []
         }
-      })`;
+      }`;
 
       setLoading(true);
       const result = await model.generateContent(prompt);
