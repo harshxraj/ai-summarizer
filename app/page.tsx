@@ -4,6 +4,7 @@ import { useState } from "react";
 import { jsPDF } from "jspdf";
 import InputBox from "./_components/InputBox";
 import { Download } from "lucide-react";
+import Example from "./_components/Example";
 
 interface SentimentAnalysis {
   overall_sentiment: string;
@@ -26,11 +27,12 @@ interface Data {
   topic_identification: TopicIdentification;
   keyword_extraction: KeywordExtraction;
 }
+const plans = [{ name: "Short" }, { name: "Medium" }, { name: "Long" }];
 
 export default function Home() {
   const [data, setData] = useState<Data | null>(null);
-  console.log(data);
   const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState(plans[1]);
 
   const generatePdf = () => {
     if (!data) return;
@@ -57,32 +59,15 @@ export default function Home() {
     doc.save(`${data.topic_identification.main_topic}.pdf`);
   };
 
-  async function fetchDataFromGemini(searchText: string) {
+  async function fetchDataFromGemini(searchText: string, summaryLength: string) {
     try {
-      const prompt = `${searchText} (Summarize the text and provide the following analyses in JSON format without formatting or using markdown. Respond with only JSON):
-      {
-        "summary": "",
-        "sentiment_analysis": {
-          "overall_sentiment": "",
-          "positive_keywords": [],
-          "negative_keywords": []
-        },
-        "topic_identification": {
-          "main_topic": "",
-          "sub_topics": []
-        },
-        "keyword_extraction": {
-          "keywords": []
-        }
-      }`;
-
       setLoading(true);
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ searchText }),
+        body: JSON.stringify({ searchText, summaryLength }),
       });
 
       if (!response.ok) {
@@ -104,7 +89,12 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center mt-2">
       <h1 className="text-3xl font-light capitalize">AI Summarizer</h1>
-      <InputBox fetchDataFromGemini={fetchDataFromGemini} loading={loading} />
+      <InputBox
+        fetchDataFromGemini={fetchDataFromGemini}
+        loading={loading}
+        selected={selected}
+        setSelected={setSelected}
+      />
       {loading && <span className="loading loading-dots loading-lg"></span>}
 
       {!loading && data && (
@@ -113,6 +103,7 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <h2 className="text-3xl mb-2">Summary</h2>
               <Download size={26} className="text-green-600 hover:cursor-pointer" onClick={generatePdf} />
+              <p className="text-sm text-slate-300">{data?.summary?.split(" ").length} words</p>
             </div>
 
             <div className="p-4 bg-gray-400 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-100/20">
@@ -131,7 +122,9 @@ export default function Home() {
             <div className="px-10 mb-2">
               <h2 className="text-2xl mb-2">Sentiment</h2>
               <div className="p-4 bg-gray-400 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-gray-100/20">
-                <p className="font-light text-slate-200">{data?.sentiment_analysis?.overall_sentiment}</p>
+                <p className="font-light text-slate-200 capitalize">
+                  {data?.sentiment_analysis?.overall_sentiment}
+                </p>
               </div>
             </div>
           </div>

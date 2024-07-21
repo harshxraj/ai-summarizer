@@ -28,7 +28,6 @@ export default function FileUploader({ fetchDataFromGemini, loading }: InputBoxP
       reader.readAsText(file);
       console.log(reader.readAsText(file));
     } else if (file.type === "application/msword" || file.type === "application/vnd.ms-word") {
-      // You need to use a library for .doc files
       reader.readAsBinaryString(file);
     } else if (file.type === "text/plain") {
       reader.readAsText(file); // For text files

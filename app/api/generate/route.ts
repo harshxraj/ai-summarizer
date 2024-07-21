@@ -5,10 +5,20 @@ const API_KEY = process.env.NEXT_PUBLIC_GEMINI_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY || "");
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
+type SummaryLength = "short" | "medium" | "long";
+
 export async function POST(request: NextRequest) {
   try {
-    const { searchText } = await request.json();
-    const prompt = `${searchText} (Summarize the text and provide the following analyses in JSON format without formatting or using markdown. Respond with only JSON):
+    const { searchText, summaryLength }: { searchText: string; summaryLength: SummaryLength } =
+      await request.json();
+    const summaryLengthMap: Record<SummaryLength, string> = {
+      short: "brief (80-100 words)",
+      medium: "detailed (100-250 words)",
+      long: "in-depth (250-400 words)",
+    };
+    const selectedSummaryLength = summaryLengthMap[summaryLength] || summaryLengthMap.medium;
+
+    const prompt = `${searchText} (Provide a ${selectedSummaryLength} summary of the text and include the following analyses in JSON format. Ensure the summary is strictly within the word count range specified. Respond with only JSON and DO NOT format or use markdown.):
     {
       "summary": "",
       "sentiment_analysis": {
