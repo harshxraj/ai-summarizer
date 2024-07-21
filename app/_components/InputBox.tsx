@@ -21,7 +21,7 @@ export default function InputBox({ fetchDataFromGemini, loading }: InputBoxProps
         <Textarea
           className={clsx(
             "mt-3 block w-full resize-none rounded-lg border-none bg-white/5 py-1.5 px-3 text-sm/6 text-white",
-            "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25"
+            "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25 custom-scrollbar"
           )}
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
